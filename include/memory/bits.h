@@ -26,9 +26,9 @@ namespace mips {
       const size_t parts = wholeSize / partSize;
       assert(parts > 0);
       assert(wholeSize % partSize == 0);
-      std::vector<TO> partitions(parts);
+      std::vector<TO> partitions;
       unsigned long long val = whole.to_ullong();
-      for (int i = 0; i < parts; i++, val >>= partSize) {
+      for (int i = 0; i < parts; i++, val <<= partSize) {
         partitions.push_back(val >> (wholeSize - partSize));
       }
       return partitions;
