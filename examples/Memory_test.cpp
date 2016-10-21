@@ -18,7 +18,9 @@ int main(void) {
   for (auto val : dmem)
     cout << val << endl;
 
-  dmem.write(4, Memory::value_type("10001111000011110000111100001111"));
+  auto val = Memory::value_type("10001111000011110000111100001111");
+  cout << endl << "write " << val << " to address 4 ..." << endl;
+  dmem.write(4, val);
 
   Memory::iterator<byte_t> bit = dmem.begin<byte_t>(), bend = dmem.end<byte_t>();
 
