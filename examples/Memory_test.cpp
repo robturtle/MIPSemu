@@ -18,6 +18,8 @@ int main(void) {
   for (auto val : dmem)
     cout << val << endl;
 
+  dmem.write(4, Memory::value_type("10001111000011110000111100001111"));
+
   Memory::iterator<byte_t> bit = dmem.begin<byte_t>(), bend = dmem.end<byte_t>();
 
   cout << "dmem (in byte mode): " << endl;
