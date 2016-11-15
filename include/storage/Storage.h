@@ -32,6 +32,8 @@ private:
   std::array<unit_type, capacity> data;
 
 public:
+  Storage() {}
+
   Storage(const std::initializer_list<unsigned long long> &list)
   {
     std::copy(
