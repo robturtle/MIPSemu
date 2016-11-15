@@ -10,4 +10,5 @@ int main(void) {
   cout << imem.read<32>(0) << endl;
   cout << imem.read<16>(4) << endl;
   cout << imem.read<16>(6) << endl;
+  cout << imem.read<32>(bitset<11>(4)) << endl;
 }

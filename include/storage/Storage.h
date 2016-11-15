@@ -60,6 +60,12 @@ public:
     return data.at(addr);
   }
 
+  template <std::size_t ret_len, std::size_t addr_len>
+  std::bitset<ret_len> read(std::bitset<addr_len> addr) const
+  {
+    return read<ret_len>(addr.to_ullong());
+  }
+
 private:
   template <std::size_t len1, std::size_t len2>
   constexpr std::bitset<len1 + len2> concat(std::bitset<len1> a, std::bitset<len2> b) const
