@@ -20,6 +20,7 @@ template <
     Ordering ordering_>
 class Storage
 {
+// TODO: iterator
 public:
   using unit_type = std::bitset<unit_size_>;
   using addr_type = std::size_t;
@@ -48,7 +49,7 @@ public:
    * @return a std::bitset<len> containing that value
    */
   template <std::size_t len>
-  std::enable_if_t<
+  constexpr std::enable_if_t<
       std::less<std::size_t>()(unit_size_, len) && len % unit_size_ == 0,
       std::bitset<len>>
   read(addr_type addr) const
@@ -68,7 +69,7 @@ public:
   }
 
   template <std::size_t val_len, std::size_t addr_len>
-  std::bitset<val_len>
+  constexpr std::bitset<val_len>
   read(const std::bitset<addr_len> &addr) const
   {
     return read<val_len>(addr.to_ullong());
@@ -79,7 +80,7 @@ public:
    * len must be a multiple of unit_size_.
    */
   template <std::size_t len>
-  std::enable_if_t<
+  constexpr std::enable_if_t<
       std::less<std::size_t>()(unit_size_, len) && len % unit_size_ == 0>
   write(addr_type addr, const std::bitset<len> &dest)
   {
@@ -90,7 +91,7 @@ public:
   }
 
   template <std::size_t len>
-  std::enable_if_t<
+  constexpr std::enable_if_t<
       len == unit_size_>
   write(addr_type addr, const std::bitset<len> &dest)
   {
@@ -98,7 +99,7 @@ public:
   }
 
   template <std::size_t val_len, std::size_t addr_len>
-  void
+  constexpr void
   write(const std::bitset<addr_len> &addr, const std::bitset<val_len> &dest)
   {
     write(addr.to_ullong(), dest);
