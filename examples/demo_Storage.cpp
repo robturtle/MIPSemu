@@ -7,7 +7,7 @@ using namespace mips::storage;
 
 int main(void) {
   cout << "Initial memory data: 1, 2, 3, 4, 5, 6, 7, 8" << endl;
-  Storage<8, 1024, BigEndian> imem = {1, 2, 3, 4, 5, 6, 7, 8};
+  Storage<8, 16, BigEndian> imem = {1, 2, 3, 4, 5, 6, 7, 8};
   cout << "read in words 0" << endl;
   cout << imem.read<32>(0) << endl;
   cout << "read in half words 4 and 6" << endl;
@@ -26,5 +26,20 @@ int main(void) {
   {
     //cout << imem.read<8>(bitset<32>(i)) << endl;
     cout << imem.read<8>(i) << endl;
+  }
+
+  cout << endl << endl << "Now use small endian storage" << endl;
+  Storage<8, 16, SmallEndian> dmem = {1, 2, 3, 4, 5, 6, 7, 8};
+  cout << "read in word 0" << endl;
+  cout << dmem.read<32>(0) << endl;
+  cout << "read in half words 4 and 6" << endl;
+  cout << dmem.read<16>(4) << endl;
+  cout << dmem.read<16>(6) << endl;
+
+  cout << endl << "Write 0x030C30C0 at 8 ..." << endl;
+  dmem.write(8, value);
+  for (int i = 8; i < 12; i++)
+  {
+    cout << dmem.read<8>(i) << endl;
   }
 }
