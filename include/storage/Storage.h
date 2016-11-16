@@ -15,17 +15,21 @@ namespace storage
 {
 
 template <
-    std::size_t unit_size,
-    std::size_t capacity,
-    Ordering ordering>
+    std::size_t unit_size_,
+    std::size_t capacity_,
+    Ordering ordering_>
 class Storage
 {
 public:
-  using unit_type = std::bitset<unit_size>;
+  using unit_type = std::bitset<unit_size_>;
   using addr_type = std::size_t;
 
+  static const std::size_t unit_size = unit_size_;
+  static const std::size_t capacity = capacity_;
+  static const Ordering ordering = ordering_;
+
 private:
-  std::array<unit_type, capacity> data;
+  std::array<unit_type, capacity_> data;
 
 public:
   Storage() {}
@@ -40,23 +44,23 @@ public:
 
   /**
    * Read len-bit long data started from address addr,
-   * len must be a multiple of unit_size.
+   * len must be a multiple of unit_size_.
    * @return a std::bitset<len> containing that value
    */
   template <std::size_t len>
   std::enable_if_t<
-      std::less<std::size_t>()(unit_size, len) && len % unit_size == 0,
+      std::less<std::size_t>()(unit_size_, len) && len % unit_size_ == 0,
       std::bitset<len>>
   read(addr_type addr) const
   {
-    unit_type unit = read<unit_size>(addr);
-    std::bitset<len - unit_size> rest = read<len - unit_size>(addr + 1);
-    return bits::concat(ordering, unit, rest);
+    unit_type unit = read<unit_size_>(addr);
+    std::bitset<len - unit_size_> rest = read<len - unit_size_>(addr + 1);
+    return bits::concat(ordering_, unit, rest);
   }
 
   template <std::size_t len>
   constexpr std::enable_if_t<
-      len == unit_size,
+      len == unit_size_,
       unit_type>
   read(addr_type addr) const
   {
@@ -72,22 +76,22 @@ public:
 
   /**
    * Write len-bit long data in where address started at addr,
-   * len must be a multiple of unit_size.
+   * len must be a multiple of unit_size_.
    */
   template <std::size_t len>
   std::enable_if_t<
-      std::less<std::size_t>()(unit_size, len) && len % unit_size == 0>
+      std::less<std::size_t>()(unit_size_, len) && len % unit_size_ == 0>
   write(addr_type addr, const std::bitset<len> &dest)
   {
-    using rest_type = std::bitset<len - unit_size>;
-    std::pair<unit_type, rest_type> splited = bits::split<unit_size, len - unit_size>(ordering, dest);
+    using rest_type = std::bitset<len - unit_size_>;
+    std::pair<unit_type, rest_type> splited = bits::split<unit_size_, len - unit_size_>(ordering_, dest);
     data.at(addr) = std::get<0>(splited);
-    write<len - unit_size>(addr + 1, std::get<1>(splited));
+    write<len - unit_size_>(addr + 1, std::get<1>(splited));
   }
 
   template <std::size_t len>
   std::enable_if_t<
-      len == unit_size>
+      len == unit_size_>
   write(addr_type addr, const std::bitset<len> &dest)
   {
     data.at(addr) = dest;

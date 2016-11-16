@@ -6,8 +6,12 @@ using namespace std;
 using namespace mips::storage;
 
 int main(void) {
+  using IMem_t = Storage<8, 16, BigEndian>;
+  cout << "Memory: unit_size = " << IMem_t::unit_size
+       << " capacity = " << IMem_t::capacity
+       << " ordering = " << IMem_t::ordering << endl;
   cout << "Initial memory data: 1, 2, 3, 4, 5, 6, 7, 8" << endl;
-  Storage<8, 16, BigEndian> imem = {1, 2, 3, 4, 5, 6, 7, 8};
+  IMem_t imem = {1, 2, 3, 4, 5, 6, 7, 8};
   cout << "read in words 0" << endl;
   cout << imem.read<32>(0) << endl;
   cout << "read in half words 4 and 6" << endl;
@@ -29,7 +33,11 @@ int main(void) {
   }
 
   cout << endl << endl << "Now use small endian storage" << endl;
-  Storage<8, 16, SmallEndian> dmem = {1, 2, 3, 4, 5, 6, 7, 8};
+  using DMem_t = Storage<8, 16, SmallEndian>;
+  cout << "Memory: unit_size = " << DMem_t::unit_size
+       << " capacity = " << DMem_t::capacity
+       << " ordering = " << DMem_t::ordering << endl;
+  DMem_t dmem = {1, 2, 3, 4, 5, 6, 7, 8};
   cout << "read in word 0" << endl;
   cout << dmem.read<32>(0) << endl;
   cout << "read in half words 4 and 6" << endl;
