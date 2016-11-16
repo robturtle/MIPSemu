@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/include/storage/a.out",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": true,

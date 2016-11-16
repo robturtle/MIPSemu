@@ -6,17 +6,13 @@
 #include <functional> // less
 #include <initializer_list>
 #include <cmath>
+#include "storage/Ordering.h"
+#include "storage/bits.h"
 
 namespace mips
 {
 namespace storage
 {
-
-enum Ordering
-{
-  BigEndian,
-  SmallEndian
-};
 
 template <
     std::size_t unit_size,
@@ -42,6 +38,11 @@ public:
         data.begin());
   }
 
+  /**
+   * Read len-bit long data started from address addr,
+   * len must be a multiple of unit_size.
+   * @return a std::bitset<len> containing that value
+   */
   template <std::size_t len>
   std::enable_if_t<
       std::less<std::size_t>()(unit_size, len) && len % unit_size == 0,
@@ -50,7 +51,7 @@ public:
   {
     unit_type unit = read<unit_size>(addr);
     std::bitset<len - unit_size> rest = read<len - unit_size>(addr + 1);
-    return concat(unit, rest);
+    return bits::concat(ordering, unit, rest);
   }
 
   template <std::size_t len>
@@ -62,24 +63,43 @@ public:
     return data.at(addr);
   }
 
-  template <std::size_t ret_len, std::size_t addr_len>
-  std::bitset<ret_len> read(std::bitset<addr_len> addr) const
+  template <std::size_t val_len, std::size_t addr_len>
+  std::bitset<val_len>
+  read(const std::bitset<addr_len> &addr) const
   {
-    return read<ret_len>(addr.to_ullong());
+    return read<val_len>(addr.to_ullong());
   }
 
-private:
-  template <std::size_t len1, std::size_t len2>
-  constexpr std::bitset<len1 + len2> concat(std::bitset<len1> a, std::bitset<len2> b) const
+  /**
+   * Write len-bit long data in where address started at addr,
+   * len must be a multiple of unit_size.
+   */
+  template <std::size_t len>
+  std::enable_if_t<
+      std::less<std::size_t>()(unit_size, len) && len % unit_size == 0>
+  write(addr_type addr, const std::bitset<len> &dest)
   {
-    switch (ordering)
-    {
-    case BigEndian:
-      return (a.to_ullong() << len2) | b.to_ullong();
-    case SmallEndian:
-      return (b.to_ullong() << len1) | a.to_ullong();
-    }
+    using rest_type = std::bitset<len - unit_size>;
+    std::pair<unit_type, rest_type> splited = bits::split<unit_size, len - unit_size>(ordering, dest);
+    data.at(addr) = std::get<0>(splited);
+    write<len - unit_size>(addr + 1, std::get<1>(splited));
   }
+
+  template <std::size_t len>
+  std::enable_if_t<
+      len == unit_size>
+  write(addr_type addr, const std::bitset<len> &dest)
+  {
+    data.at(addr) = dest;
+  }
+
+  template <std::size_t val_len, std::size_t addr_len>
+  void
+  write(const std::bitset<addr_len> &addr, const std::bitset<val_len> &dest)
+  {
+    write(addr.to_ullong(), dest);
+  }
+
 };
 
 } /* ns storage */
