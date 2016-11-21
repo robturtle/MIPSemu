@@ -11,3 +11,5 @@ configure_file(examples/imem.txt ${CMAKE_BINARY_DIR}/imem.txt COPYONLY)
 configure_file(examples/dmem.txt ${CMAKE_BINARY_DIR}/dmem.txt COPYONLY)
 
 add_executable(demo_Storage examples/demo_Storage.cpp)
+
+add_subdirectory(gigo)

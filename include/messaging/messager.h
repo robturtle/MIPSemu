@@ -18,6 +18,7 @@ struct Messager : protected clocks::LogicClock
 {
   using clocks::LogicClock::clock_type;
   using clocks::LogicClock::get_clock;
+  virtual ~Messager() {}
 };
 
 template <typename Msg>
@@ -62,8 +63,25 @@ private:
   }
 };
 
-class MessageHandler : protected clocks::LogicClock
+template <typename Msg>
+class UnsyncMessageSender : public MessageSender<Msg>
 {
+private:
+  void write(Msg const &new_msg, Messager::clock_type clock_value)
+  {
+    MessageSender<Msg>::write(new_msg, clock_value);
+  }
+
+public:
+  void write(Msg const &new_msg)
+  {
+    write(new_msg, std::numeric_limits<Messager::clock_type>::max());
+  }
+};
+
+class MessageHandlerBase : protected clocks::LogicClock
+{
+protected:
   template <typename Msg>
   friend class MessageAdaptor;
 
@@ -74,33 +92,18 @@ class MessageHandler : protected clocks::LogicClock
 public:
   using LogicClock::get_clock;
 
-  void start()
-  {
-    while (true)
-    {
-      clock_type clock_value = get_clock();
-      std::unique_lock<std::mutex> lk{entity_access};
-      message_arrival.wait(lk, [this, &clock_value] {
-        return std::all_of(
-            senders.begin(), senders.end(),
-            [&clock_value](auto s) { return s->get_clock() >= clock_value; });
-      });
-      forward_clock();
-      std::async(std::launch::async, [this, &clock_value] { process(clock_value); });
-    }
-  }
+  virtual void start(UnsyncMessageSender<bool> *terminator) = 0;
 
 protected:
   virtual void process(clock_type const& clock_value) = 0;
 
 private:
-  void notify(Messager const *sender) const
+  void notify() const
   {
-    update_clock(sender->get_clock());
     message_arrival.notify_one();
   }
 
-  void subscribe_to(Messager const *sender) const
+  void sync_with(Messager const *sender) const
   {
     senders.push_back(sender);
   }
@@ -112,23 +115,55 @@ class MessageAdaptor
   friend class MessageHandler;
 
   MessageSender<Msg> const *sender;
-  MessageHandler const *handler;
+  MessageHandlerBase const *handler;
 
 public:
   MessageAdaptor(
-      MessageHandler const *handler,
+      MessageHandlerBase const *handler,
       MessageSender<Msg> const *sender = nullptr)
       : handler(handler), sender(sender) {}
 
   Msg const &read() const { return sender->read(); }
 
-  void notify() const { handler->notify(sender); }
+  void notify() const { handler->notify(); }
 
-  void attach_to(MessageSender<Msg> *new_sender)
+  void attach_to(MessageSender<Msg> const *new_sender)
   {
     sender = new_sender;
     sender->attach_to(this);
-    handler->subscribe_to(sender);
+    handler->sync_with(sender);
+  }
+
+  void attach_to(UnsyncMessageSender<Msg> const *new_sender)
+  {
+    sender = new_sender;
+    sender->attach_to(this);
+  }
+};
+
+class MessageHandler : public MessageHandlerBase
+{
+  MessageAdaptor<bool> power_line{this};
+
+public:
+  void start(UnsyncMessageSender<bool> *terminator) override
+  {
+    power_line.attach_to(terminator);
+    while (true)
+    {
+      clock_type clock_value = get_clock();
+      std::unique_lock<std::mutex> lk{entity_access};
+      message_arrival.wait(lk, [this, &clock_value, &terminator] {
+        return !terminator->read() ||
+               std::all_of(
+                   senders.begin(), senders.end(),
+                   [&clock_value](auto s) { return s->get_clock() > clock_value; });
+      });
+      if (!terminator->read())
+        break;
+      forward_clock();
+      std::async(std::launch::async, [this] { process(get_clock()); });
+    }
   }
 };
 
