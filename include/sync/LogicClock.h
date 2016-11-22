@@ -3,16 +3,16 @@
 #include <atomic>
 #include <algorithm>
 
-namespace clocks
+namespace sync
 {
+  using clock_type = uint64_t;
 
 class LogicClock
 {
-public:
-  using clock_type = uint64_t;
-
-private:
   mutable std::atomic<uint64_t> clock_value;
+
+public:
+  LogicClock(): clock_value(0) {}
 
 protected:
   uint64_t get_clock() const { return clock_value; }
