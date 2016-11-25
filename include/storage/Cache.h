@@ -107,14 +107,14 @@ public:
     return bits::range(addr, len_offset + len_index, len_addr);
   }
 
-  constexpr size_t _(size_t set, size_t way) const
+  constexpr size_t _(size_t idx, size_t way) const
   {
-    return idx_way({set, way});
+    return idx_way({idx, way});
   }
 
-  constexpr size_t __(size_t set, size_t way, size_t offset) const
+  constexpr size_t __(size_t idx, size_t way, size_t offset) const
   {
-    return idx_way_offset({set, way, offset});
+    return idx_way_offset({idx, way, offset});
   }
 
   unit_type read(size_t addr)
