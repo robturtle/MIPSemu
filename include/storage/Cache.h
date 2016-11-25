@@ -94,6 +94,7 @@ private:
 
   mutable CacheResult cache_result;
 
+public:
   size_t const size_block;
   size_t const num_ways;
   size_t const capacity;
@@ -102,7 +103,6 @@ private:
   size_t const len_offset = std::log2(size_block);
   size_t const len_tag = len_addr - len_index - len_offset;
 
-public:
   using unit_type = typename CacheImpl::unit_type;
 
   Cache(
@@ -117,11 +117,23 @@ public:
         capacity(capacity),
         idx_way_offset(detail::Dimensions({num_ways, size_block}))
   {
+    setup();
+  }
+
+  Cache(Cache const &other)
+      : Cache(other.lower, other.size_block, other.num_ways, other.capacity) {}
+
+private:
+  void setup()
+  {
+    way_info.resize(0);
     way_info.resize(capacity / size_block);
     way_info.reshape({num_ways});
+    evict_way.resize(0);
     evict_way.resize(capacity / size_block / num_ways);
   }
 
+public:
   constexpr size_t index(size_t addr) const
   {
     return bits::range(addr, len_offset, len_offset + len_index);
