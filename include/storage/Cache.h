@@ -165,6 +165,18 @@ protected:
   void cache_block(size_t addr, size_t way)
   {
     size_t idx = index(addr);
+    // write back
+    // NOTE I have to implement Cache's iterator before it can compile
+    if (valid.at(_(idx, way)))
+    {
+      size_t cur_addr = form_addr(tags.at(_(idx, way)), idx);
+      std::copy(
+          caches.begin() + __(idx, way, 0),
+          caches.begin() + __(idx, way, 0) + size_block,
+          lower.begin() + cur_addr); // TODO add contract that Cache::iterator::+ can only apply when it's at begin()
+    }
+
+    // load in
     // NOTE I have to implement Storage's iterator before it can compile
     std::copy(
         lower.begin() + addr,
@@ -174,6 +186,12 @@ protected:
     tags.at(_(idx, way)) = tag(addr);
     valid.at(_(idx, way)) = true;
     evict_way.at(idx) = (way + 1) % num_ways;
+  }
+
+  constexpr size_t form_addr(size_t tag, size_t idx) const
+  {
+    size_t addr = (tag << len_index) | idx;
+    return addr << len_offset;
   }
 };
 
