@@ -63,24 +63,32 @@ istream &operator>>(istream& in, TraceEntry &entry)
 template <typename T>
 void pcache(T c)
 {
-  cout << "offset: " << c.len_offset << endl
-       << "index : " << c.len_index << endl
-       << "tag   : " << c.len_tag << endl
-       << "block size : " << c.size_block << endl
-       << "ways       : " << c.num_ways << endl
-       << "capacity   : " << c.capacity/1024 << "KB" << endl;
+  cout << "offset: " << c.len_offset << '\n'
+       << "index : " << c.len_index << '\n'
+       << "tag   : " << c.len_tag << '\n'
+       << "block size : " << c.size_block << '\n'
+       << "ways       : " << c.num_ways << '\n'
+       << "capacity   : " << c.capacity/1024 << "KB" << '\n';
+}
+
+template <typename T>
+void paddr(T cache, size_t addr)
+{
+    cout << "index = 0x" << cache.index(addr) << " ";
+    cout << "tag = 0x" << cache.tag(addr) << " ";
+    cout << "offset = 0x" << cache.offset(addr) << "\n";
 }
 #endif
 
 void cannot_open(char const * const fname)
 {
-  cout << "ERROR: Cannot open file " << fname << endl;
+  cout << "ERROR: Cannot open file " << fname << '\n';
   exit(2);
 }
 
 void usage(char const * const app)
 {
-    cout << "USAGE: " << app << " CACHE_CONFIG.TXT TRACES.TXT" << endl;
+    cout << "USAGE: " << app << " CACHE_CONFIG.TXT TRACES.TXT" << '\n';
     exit(1);
 }
 
@@ -117,9 +125,13 @@ int main(int argc, char const *const argv[])
     traces >> entry;
     if (traces.eof()) break;
 #ifndef NDEBUG
+    cout << '\n';
     cout << (entry.is_read ? "READ " : "WRITE") << " "
-         << hex << entry.addr
-         << dec << "(" << entry.addr << ")" << endl;
+         << hex << entry.addr << '\n';
+    cout << "L1: \n";
+    paddr(l1, entry.addr);
+    cout << "L2: \n";
+    paddr(l2, entry.addr);
 #endif
     if (entry.is_read)
     {
