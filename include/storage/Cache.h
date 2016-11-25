@@ -112,7 +112,7 @@ public:
     return idx_way({idx, way});
   }
 
-  constexpr size_t __(size_t idx, size_t way, size_t offset) const
+  constexpr size_t linear_addr(size_t idx, size_t way, size_t offset) const
   {
     return idx_way_offset({idx, way, offset});
   }
@@ -131,7 +131,7 @@ public:
       way = evict_way.at(idx);
       cache_block(addr, way);
     }
-    return caches.read(__(idx, way, offset(addr)));
+    return caches.read(linear_addr(idx, way, offset(addr)));
   }
 
   void write(size_t addr, unit_type const &value)
@@ -141,7 +141,7 @@ public:
     if (way < num_ways)
     {
       cache_result = WriteHit;
-      caches.write(__(idx, way, offset(addr)), value);
+      caches.write(linear_addr(idx, way, offset(addr)), value);
     }    
     else
     {
@@ -171,18 +171,21 @@ protected:
   void cache_block(size_t addr, size_t way)
   {
     size_t idx = index(addr);
+    size_t cache_base = linear_addr(idx, way, 0);
+
     if (valid.at(_(idx, way)))
     {
       size_t cur_addr = form_addr(tags.at(_(idx, way)), idx, 0);
       for (size_t i = 0; i < size_block; i++)
       {
-        lower.write(cur_addr + i, caches.read(__(idx, way, i)));
+        lower.write(cur_addr + i, caches.read(cache_base + i));
       }
     }
 
+    size_t base = addr >> len_offset << len_offset;
     for (size_t i = 0; i < size_block; i++)
     {
-      caches.write(__(idx, way, i), lower.read(addr + i));
+      caches.write(cache_base + i, lower.read(base + i));
     }
 
     tags.at(_(idx, way)) = tag(addr);
