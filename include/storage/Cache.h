@@ -48,10 +48,12 @@ enum CacheResult
 
 template <
     typename LowerStorage,
-    size_t len_addr,
+    size_t len_addr_,
     typename CacheImpl = Storage<8, BigEndian>>
 class Cache
 {
+  static size_t const len_addr = len_addr_;
+
   LowerStorage &lower;
 
   CacheImpl caches;
