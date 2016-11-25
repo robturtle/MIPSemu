@@ -130,6 +130,7 @@ int main(int argc, char const *const argv[])
       l1.write(entry.addr, 0xaa);
     }
     cout << l1.last_cache_result() << ' ' << l2.last_cache_result() << '\n';
+    traceout << l1.last_cache_result() << ' ' << l2.last_cache_result() << '\n';
     l1.clear_cache_result();
     l2.clear_cache_result();
   }
