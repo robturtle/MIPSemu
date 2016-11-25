@@ -65,7 +65,7 @@ class Cache
   size_t const num_ways;
   size_t const capacity;
 
-  detail::Dimensions const set_way, set_way_offset;
+  detail::Dimensions const idx_way, idx_way_offset;
 
   size_t const len_index = std::log2(capacity / size_block / num_ways);
   size_t const len_offset = std::log2(size_block);
@@ -84,8 +84,8 @@ public:
         size_block(size_block),
         num_ways(num_ways),
         capacity(capacity),
-        set_way(detail::Dimensions({num_ways})),
-        set_way_offset(detail::Dimensions({num_ways, size_block}))
+        idx_way(detail::Dimensions({num_ways})),
+        idx_way_offset(detail::Dimensions({num_ways, size_block}))
   {
     tags.resize(capacity / size_block);
     valid.resize(capacity / size_block);
@@ -109,18 +109,18 @@ public:
 
   constexpr size_t _(size_t set, size_t way) const
   {
-    return set_way({set, way});
+    return idx_way({set, way});
   }
 
   constexpr size_t __(size_t set, size_t way, size_t offset) const
   {
-    return set_way_offset({set, way, offset});
+    return idx_way_offset({set, way, offset});
   }
 
   unit_type read(size_t addr)
   {
-    size_t set = index(addr);
-    size_t way = find_hit_way(set, tag(addr));
+    size_t idx = index(addr);
+    size_t way = find_hit_way(idx, tag(addr));
     if (way < num_ways)
     {
       cache_result = ReadHit;
@@ -128,20 +128,20 @@ public:
     else
     {
       cache_result = ReadMiss;
-      way = evict_way.at(set);
+      way = evict_way.at(idx);
       cache_block(addr, way);
     }
-    return caches.read(__(set, way, offset(addr)));
+    return caches.read(__(idx, way, offset(addr)));
   }
 
   void write(size_t addr, unit_type const &value)
   {
-    size_t set = index(addr);
-    int way = find_hit_way(set, tag(addr));
+    size_t idx = index(addr);
+    size_t way = find_hit_way(idx, tag(addr));
     if (way < num_ways)
     {
       cache_result = WriteHit;
-      caches.write(__(set, way, offset(addr)), value);
+      caches.write(__(idx, way, offset(addr)), value);
     }    
     else
     {
@@ -150,11 +150,11 @@ public:
   }
 
 protected:
-  int find_hit_way(size_t set, size_t tag) const
+  int find_hit_way(size_t idx, size_t tag) const
   {
     for (size_t i = 0; i < num_ways; i++)
     {
-      if (valid.at(_(set, i)) && tags.at(_(set, i)) == tag)
+      if (valid.at(_(idx, i)) && tags.at(_(idx, i)) == tag)
       {
         return i;
       }
@@ -164,16 +164,16 @@ protected:
 
   void cache_block(size_t addr, size_t way)
   {
-    size_t set = index(addr);
+    size_t idx = index(addr);
     // NOTE I have to implement Storage's iterator before it can compile
     std::copy(
         lower.begin() + addr,
         lower.begin() + addr + size_block,
-        caches.begin() + __(set, way, 0));
+        caches.begin() + __(idx, way, 0));
 
-    tags.at(_(set, way)) = tag(addr);
-    valid.at(_(set, way)) = true;
-    evict_way.at(set) = (way + 1) % num_ways;
+    tags.at(_(idx, way)) = tag(addr);
+    valid.at(_(idx, way)) = true;
+    evict_way.at(idx) = (way + 1) % num_ways;
   }
 };
 
