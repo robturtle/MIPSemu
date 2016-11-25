@@ -2,6 +2,7 @@
 #define MIPS_YANGLIU_BITS_1115
 
 #include "storage/Ordering.h"
+#include <bitset>
 #include <cstdlib>
 
 namespace bits
