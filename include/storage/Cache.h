@@ -49,12 +49,12 @@ enum CacheResult
 template <
     typename LowerStorage,
     size_t len_addr,
-    typename Store = Storage<8, BigEndian>>
+    typename CacheImpl = Storage<8, BigEndian>>
 class Cache
 {
   LowerStorage &lower;
 
-  Store caches;
+  CacheImpl caches;
   std::vector<size_t> tags;
   std::vector<size_t> evict_way;
   std::vector<bool> valid;
@@ -72,7 +72,7 @@ class Cache
   size_t const len_tag = len_addr - len_index - len_offset;
 
 public:
-  using unit_type = typename Store::unit_type;
+  using unit_type = typename CacheImpl::unit_type;
 
   Cache(
       LowerStorage &lower,
@@ -80,7 +80,7 @@ public:
       size_t num_ways,
       size_t capacity)
       : lower(lower),
-        caches(Store(capacity)),
+        caches(CacheImpl(capacity)),
         size_block(size_block),
         num_ways(num_ways),
         capacity(capacity),
