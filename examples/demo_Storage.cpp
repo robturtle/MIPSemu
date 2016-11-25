@@ -28,7 +28,7 @@ int main(void) {
   for (int i = 8; i < 12; i++)
   {
     //cout << imem.read<8>(bitset<32>(i)) << endl;
-    cout << imem.read<8>(i) << endl;
+    cout << imem.read(i) << endl;
   }
 
   cout << endl << endl << "Now use small endian storage" << endl;
@@ -46,6 +46,6 @@ int main(void) {
   dmem.write(8, value);
   for (int i = 8; i < 12; i++)
   {
-    cout << dmem.read<8>(i) << endl;
+    cout << dmem.read(i) << endl;
   }
 }
