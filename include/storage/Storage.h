@@ -1,7 +1,7 @@
 #ifndef MIPSEMU_STORAGE_H
 #define MIPSEMU_STORAGE_H
 
-#include <array>
+#include <vector>
 #include <bitset>
 #include <functional> // less
 #include <initializer_list>
@@ -16,7 +16,6 @@ namespace storage
 
 template <
     std::size_t unit_size_,
-    std::size_t capacity_,
     Ordering ordering_>
 class Storage
 {
@@ -26,20 +25,24 @@ public:
   using addr_type = std::size_t;
 
   static const std::size_t unit_size = unit_size_;
-  static const std::size_t capacity = capacity_;
   static const Ordering ordering = ordering_;
 
 private:
-  std::array<unit_type, capacity_> data;
+  size_t const capacity;
+  std::vector<unit_type> data;
 
 public:
-  Storage() {}
+  Storage(size_t capacity) : capacity(capacity)
+  {
+    data.resize(capacity);
+  }
 
-  Storage(const std::initializer_list<unsigned long long> &list)
+  Storage(size_t capacity, const std::initializer_list<unsigned long long> &list)
+      : Storage(capacity)
   {
     std::copy(
         list.begin(),
-        std::min(list.end(), list.begin() + data.size()),
+        std::min(list.end(), list.begin() + capacity),
         data.begin());
   }
 
