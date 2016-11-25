@@ -145,8 +145,14 @@ public:
     }    
     else
     {
+      cache_result = WriteMiss;
       lower.write(addr, value);
     }
+  }
+
+  void clear_cache_result() const
+  {
+    cache_result = NoAccess;
   }
 
 protected:
