@@ -78,6 +78,11 @@ public:
     return read<val_len>(addr.to_ullong());
   }
 
+  constexpr unit_type read(addr_type addr) const
+  {
+    return data.at(addr);
+  }
+
   /**
    * Write len-bit long data in where address started at addr,
    * len must be a multiple of unit_size_.
@@ -106,6 +111,12 @@ public:
   write(const std::bitset<addr_len> &addr, const std::bitset<val_len> &dest)
   {
     write(addr.to_ullong(), dest);
+  }
+
+  constexpr void
+  write(addr_type addr, unit_type const &dest)
+  {
+    data.at(addr) = dest;
   }
 
 };
