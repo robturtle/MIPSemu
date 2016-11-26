@@ -12,7 +12,7 @@ template <typename T>
 constexpr T range(T value, size_t lo, size_t hi)
 {
   auto size = sizeof(value)*8;
-  return value << (size - hi) >> (size - hi + lo);
+  return lo == hi ? 0 : value << (size - hi) >> (size - hi + lo);
 }
 
 template <std::size_t n>
