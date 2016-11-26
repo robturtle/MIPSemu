@@ -130,6 +130,8 @@ void paddr(T cache, size_t addr)
   cout << "offset = 0x" << cache.offset(addr) << "\n";
   cout << (t|i|o) << '\n';
 }
+
+vector<string> const cache_result_names = {"NoAccess", "ReadHit", "ReadMiss", "WriteHit", "WriteMiss"};
 #endif
 
 void cannot_open(char const * const fname)
@@ -193,7 +195,11 @@ int main(int argc, char const *const argv[])
     {
       l1.write(entry.addr, 0xaa);
     }
-    cout << l1.last_cache_result() << ' ' << l2.last_cache_result() << '\n';
+#ifndef NDEBUG
+    cout << "Cache Result:" << '\n';
+    cout << cache_result_names.at(l1.last_cache_result()) << ' '
+         << cache_result_names.at(l2.last_cache_result()) << endl;
+#endif
     traceout << l1.last_cache_result() << ' ' << l2.last_cache_result() << '\n';
     l1.clear_cache_result();
     l2.clear_cache_result();
