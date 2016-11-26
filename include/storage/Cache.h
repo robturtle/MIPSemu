@@ -113,7 +113,7 @@ public:
       : lower(lower),
         caches(CacheImpl(capacity)),
         size_block(size_block),
-        num_ways(num_ways),
+        num_ways(num_ways == 0 ? capacity/size_block : num_ways),
         capacity(capacity),
         idx_way_offset(detail::Dimensions({num_ways, size_block}))
   {
