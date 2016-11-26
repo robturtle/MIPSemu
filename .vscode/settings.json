@@ -3,5 +3,11 @@
   "clang.cxxflags":[
     "-I${workspaceRoot}/include",
     "-std=c++14"
-  ]
+  ],
+  "cmake.debugConfig":{
+    "args": [
+      "${workspaceRoot}/lab2/examples/cacheconfig.txt",
+      "${workspaceRoot}/lab2/examples/trace.txt"
+    ]
+  }
 }
