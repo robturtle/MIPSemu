@@ -121,14 +121,16 @@ void pcache(T c)
 template <typename T>
 void paddr(T cache, size_t addr)
 {
-  cout << BinInspect(addr, 32) << '\n';
-  BinInspect t{cache.tag(addr), cache.len_tag};
-  BinInspect i{cache.index(addr), cache.len_index};
-  BinInspect o{cache.offset(addr), cache.len_offset};
   cout << "tag = 0x" << cache.tag(addr) << " ";
   cout << "index = 0x" << cache.index(addr) << " ";
   cout << "offset = 0x" << cache.offset(addr) << "\n";
+#ifdef BIN_INSPECT
+  BinInspect t{cache.tag(addr), cache.len_tag};
+  BinInspect i{cache.index(addr), cache.len_index};
+  BinInspect o{cache.offset(addr), cache.len_offset};
+  cout << BinInspect(addr, 32) << '\n';
   cout << (t|i|o) << '\n';
+#endif
 }
 
 vector<string> const cache_result_names = {"NoAccess", "ReadHit", "ReadMiss", "WriteHit", "WriteMiss"};
@@ -182,9 +184,9 @@ int main(int argc, char const *const argv[])
     cout << '\n';
     cout << (entry.is_read ? "READ " : "WRITE") << " "
          << hex << entry.addr << '\n';
-    cout << "L1: \n";
+    cout << "L1: ";
     paddr(l1, entry.addr);
-    cout << "L2: \n";
+    cout << "L2: ";
     paddr(l2, entry.addr);
 #endif
     if (entry.is_read)
