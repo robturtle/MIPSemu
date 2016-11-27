@@ -27,7 +27,7 @@ The commands used above is:
 ```shell
 mkdir build
 cd build
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 ```
 
 Now we can make the project:
@@ -38,3 +38,14 @@ Use this command to execute the simulator:
 ./lab2/cache_sim cacheconfig.txt trace.txt
 ```
 The output is at `trace.txt.out`
+
+### Other build options
+Build the project in Debug mode which will prints out verbose debug info:
+```shell
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+```
+
+Also prints out binary expressions debug info:
+```shell
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DBIN_INSPECT=ON
+```
