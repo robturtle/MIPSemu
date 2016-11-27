@@ -5,18 +5,18 @@ Cache simulator
 #include "util/BinInspect.h"
 #endif
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <iomanip>
-#include <cstdlib>
-#include <cmath>
 #include <bitset>
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 using namespace std;
-#include "storage/bits.h"
 #include "storage/Cache.h"
+#include "storage/bits.h"
 using namespace bits;
 using namespace mips::storage;
 
@@ -53,7 +53,7 @@ struct TraceEntry
   size_t addr;
 };
 
-istream &operator>>(istream& in, TraceEntry &entry)
+istream &operator>>(istream &in, TraceEntry &entry)
 {
   char rw;
   in >> rw >> hex >> entry.addr >> dec;
@@ -70,7 +70,7 @@ void pcache(T c)
        << "tag   : " << c.len_tag << '\n'
        << "block size : " << c.size_block << '\n'
        << "ways       : " << c.num_ways << '\n'
-       << "capacity   : " << c.capacity/1024 << "KB" << '\n';
+       << "capacity   : " << c.capacity / 1024 << "KB" << '\n';
 }
 
 template <typename T>
@@ -84,35 +84,39 @@ void paddr(T cache, size_t addr)
   BinInspect i{cache.index(addr), cache.len_index};
   BinInspect o{cache.offset(addr), cache.len_offset};
   cout << BinInspect(addr, 32) << '\n';
-  cout << (t|i|o) << '\n';
+  cout << (t | i | o) << '\n';
 #endif
 }
 
 vector<string> const cache_result_names = {"NoAccess", "ReadHit", "ReadMiss", "WriteHit", "WriteMiss"};
 #endif
 
-void cannot_open(char const * const fname)
+void cannot_open(char const *const fname)
 {
   cout << "ERROR: Cannot open file " << fname << '\n';
   exit(2);
 }
 
-void usage(char const * const app)
+void usage(char const *const app)
 {
-    cout << "USAGE: " << app << " CACHE_CONFIG.TXT TRACES.TXT" << '\n';
-    exit(1);
+  cout << "USAGE: " << app << " CACHE_CONFIG.TXT TRACES.TXT" << '\n';
+  exit(1);
 }
 
 int main(int argc, char const *const argv[])
 {
-  if (argc < 3) usage(argv[0]);
+  if (argc < 3)
+    usage(argv[0]);
 
   CacheConfig c1, c2;
   ifstream config_in{argv[1]};
-  if (!config_in.is_open()) { cannot_open(argv[1]); }
+  if (!config_in.is_open())
+  {
+    cannot_open(argv[1]);
+  }
   config_in >> c1 >> c2;
 
-  MemMock memory;  
+  MemMock memory;
   L2_t l2{memory, c2.size_block, c2.num_ways, c2.capacity};
   L1_t l1{l2, c1.size_block, c1.num_ways, c1.capacity};
 
@@ -125,16 +129,23 @@ int main(int argc, char const *const argv[])
 #endif
 
   ifstream traces{argv[2]};
-  if (!traces.is_open()) { cannot_open(argv[2]); }
+  if (!traces.is_open())
+  {
+    cannot_open(argv[2]);
+  }
   string outfname = (ostringstream() << argv[2] << ".out").str();
   ofstream traceout{outfname};
-  if (!traceout.is_open()) { cannot_open(outfname.c_str()); }
+  if (!traceout.is_open())
+  {
+    cannot_open(outfname.c_str());
+  }
 
   TraceEntry entry;
   while (traces.good())
   {
     traces >> entry;
-    if (traces.eof()) break;
+    if (traces.eof())
+      break;
     int l2_result;
     if (entry.is_read)
     {
