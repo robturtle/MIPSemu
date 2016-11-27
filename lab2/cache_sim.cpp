@@ -1,6 +1,9 @@
 /*
 Cache simulator
  */
+#ifdef BIN_INSPECT
+#include "util/BinInspect.h"
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -13,7 +16,6 @@ Cache simulator
 #include <bitset>
 using namespace std;
 #include "storage/bits.h"
-#include "storage/Storage.h"
 #include "storage/Cache.h"
 using namespace bits;
 using namespace mips::storage;
@@ -60,53 +62,6 @@ istream &operator>>(istream& in, TraceEntry &entry)
 }
 
 #ifndef NDEBUG
-struct BinInspect
-{
-  string bin_format, hex_format;
-
-  BinInspect(size_t value, size_t len)
-  {
-    ostringstream bs, hs;
-    for (size_t i = 0, v = value; i < len; i++)
-    {
-      bs << v % 2;
-      v /= 2;
-      if (i != len - 1 && i % 4 == 3) bs << '-';
-    } 
-
-    size_t hex_len = (len - 1)/4 + 1;
-    hs << hex;
-    for (size_t i = 0, v = value; i < hex_len; i++)
-    {
-      hs << v % 0x10;
-      v /= 0x10;
-      if (i != hex_len -1) hs << "    ";
-      else if (len % 4 == 0) hs << "   ";
-      else for (int k = 0; k < len % 4 - 1; k++) hs << ' ';
-    }
-    bin_format = bs.str();
-    reverse(bin_format.begin(), bin_format.end());
-    hex_format = hs.str();
-    reverse(hex_format.begin(), hex_format.end());
-  }
-
-  BinInspect operator|(BinInspect const &other)
-  {
-    BinInspect copy(*this);
-    copy.bin_format =
-        (ostringstream() << copy.bin_format << ' ' << other.bin_format).str();
-    copy.hex_format =
-        (ostringstream() << copy.hex_format << ' ' << other.hex_format).str();
-    return copy;
-  }
-};
-
-ostream& operator<<(ostream &o, BinInspect const &b)
-{
-  o << b.bin_format << '\n' << b.hex_format;
-  return o;
-}
-
 template <typename T>
 void pcache(T c)
 {
@@ -180,15 +135,6 @@ int main(int argc, char const *const argv[])
   {
     traces >> entry;
     if (traces.eof()) break;
-#ifndef NDEBUG
-    cout << '\n';
-    cout << (entry.is_read ? "READ " : "WRITE") << " "
-         << hex << entry.addr << '\n';
-    cout << "L1: ";
-    paddr(l1, entry.addr);
-    cout << "L2: ";
-    paddr(l2, entry.addr);
-#endif
     if (entry.is_read)
     {
       l1.read(entry.addr);
@@ -198,6 +144,13 @@ int main(int argc, char const *const argv[])
       l1.write(entry.addr, 0xaa);
     }
 #ifndef NDEBUG
+    cout << '\n';
+    cout << (entry.is_read ? "READ " : "WRITE") << " "
+         << hex << entry.addr << '\n';
+    cout << "L1: ";
+    paddr(l1, entry.addr);
+    cout << "L2: ";
+    paddr(l2, entry.addr);
     cout << "Cache Result:" << '\n';
     cout << cache_result_names.at(l1.last_cache_result()) << ' '
          << cache_result_names.at(l2.last_cache_result()) << endl;

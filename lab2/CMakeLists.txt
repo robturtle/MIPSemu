@@ -1,6 +1,12 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+option(BIN_INSPECT "Inspect binary expressions in Cache Simulator")
+if(BIN_INSPECT)
+  add_compile_options("-DBIN_INSPECT")
+endif(BIN_INSPECT)
+
+
 add_executable(cache_sim cache_sim.cpp)
 
 configure_file(examples/cacheconfig.txt ${CMAKE_BINARY_DIR}/cacheconfig.txt COPYONLY)
