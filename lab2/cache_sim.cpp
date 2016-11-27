@@ -135,13 +135,23 @@ int main(int argc, char const *const argv[])
   {
     traces >> entry;
     if (traces.eof()) break;
+    int l2_result;
     if (entry.is_read)
     {
+      // Since L1's read will cause L2 caching blocks, we manually make l2 read first
+      // so we can get the correct access result of L2
+      l2.read(entry.addr);
+      l2_result = l2.last_cache_result();
       l1.read(entry.addr);
+      if (l1.last_cache_result() == ReadHit)
+      {
+        l2_result = NoAccess;
+      }
     }
     else
     {
       l1.write(entry.addr, 0xaa);
+      l2_result = l2.last_cache_result();
     }
 #ifndef NDEBUG
     cout << '\n';
@@ -153,9 +163,9 @@ int main(int argc, char const *const argv[])
     paddr(l2, entry.addr);
     cout << "Cache Result:" << '\n';
     cout << cache_result_names.at(l1.last_cache_result()) << ' '
-         << cache_result_names.at(l2.last_cache_result()) << endl;
+         << cache_result_names.at(l2_result) << endl;
 #endif
-    traceout << l1.last_cache_result() << ' ' << l2.last_cache_result() << '\n';
+    traceout << l1.last_cache_result() << ' ' << l2_result << '\n';
     l1.clear_cache_result();
     l2.clear_cache_result();
   }
