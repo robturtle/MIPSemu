@@ -1,6 +1,10 @@
 #ifndef CS6133_YANGLIU_CACHE_1127_2219
 #define CS6133_YANGLIU_CACHE_1127_2219
 
+#ifndef NDEBUG
+#include "cache_debug.h"
+#endif
+
 #include <cmath>
 #include <vector>
 
@@ -22,6 +26,14 @@ struct WayInfo
 template <typename Lower>
 class Cache
 {
+#ifndef NDEBUG
+public:
+  void inspect_tags()
+  {
+    inspect_way_tags(way_info, ways_per_index);
+  }
+#endif
+
   Lower &lower;
   
   std::vector<char> caches;

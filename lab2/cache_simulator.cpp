@@ -111,19 +111,45 @@ int main(int argc, char const *const argv[])
       break;
     
     size_t addr = entry.addr;
+    ostringstream result;
     if (entry.is_read)
     {
-      traceout << (l1.hit(addr) ? ReadHit : ReadMiss) << ' ';
-      if (l1.hit(addr)) traceout << NoAccess << '\n';
-      else traceout << (l2.hit(addr) ? ReadHit : ReadMiss) << '\n';
+      result << (l1.hit(addr) ? ReadHit : ReadMiss) << ' ';
+      if (l1.hit(addr)) result << NoAccess << '\n';
+      else result << (l2.hit(addr) ? ReadHit : ReadMiss) << '\n';
       l1.read(addr);
     }
     else
     {
-      traceout << (l1.hit(addr) ? WriteHit : WriteMiss) << ' ';
-      if (l1.hit(addr)) traceout << NoAccess << '\n';
-      else traceout << (l2.hit(addr) ? WriteHit : WriteMiss) << '\n';
+      result << (l1.hit(addr) ? WriteHit : WriteMiss) << ' ';
+      if (l1.hit(addr)) result << NoAccess << '\n';
+      else result << (l2.hit(addr) ? WriteHit : WriteMiss) << '\n';
       l1.write(addr, 0xaa);
     }
+    traceout << result.str();
+#ifndef NDEBUG
+    cout << hex;
+    cout << (entry.is_read ? "Read" : "Write") << " " << addr << '\n';
+    cout << "RESULT: " << result.str();
+
+    cout << "L1: ";
+    cout << "TAG: " << setw(6) << l1.tag(addr)
+         << " INDEX: " << setw(4) << l1.index(addr)
+         << " OFFSET: " << setw(4) << l1.offset(addr)
+         << '\n';
+    cout << "TAGS: \n";
+    l1.inspect_tags();
+
+    cout << "\nL2: ";
+    cout << "TAG: " << setw(6) << l2.tag(addr)
+         << " INDEX: " << setw(4) << l2.index(addr)
+         << " OFFSET: " << setw(4) << l2.offset(addr)
+         << '\n';
+    cout << "TAGS: \n";
+    l2.inspect_tags();
+
+    cout << "\npress Enter to continue..." << endl;
+    cin.get();
+#endif
   }
 }
