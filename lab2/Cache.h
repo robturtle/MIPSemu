@@ -35,15 +35,23 @@ public:
   size_t const ways_per_index;
   size_t const capacity;
 
-  size_t const num_all_ways = capacity / size_block;
-  size_t const num_indices = num_all_ways / ways_per_index;
+  size_t const num_all_ways;
+  size_t const num_indices;
 
-  size_t const len_index = std::log2(num_indices);
-  size_t const len_offset = std::log2(size_block);
-  size_t const len_tag = len_addr - len_index - len_offset;
+  size_t const len_index;
+  size_t const len_offset;
+  size_t const len_tag;
 
   Cache(Lower &lower, size_t size_block, size_t ways_per_index, size_t capacity)
-      : lower(lower), size_block(size_block), ways_per_index(ways_per_index), capacity(capacity)
+      : lower(lower),
+        size_block(size_block),
+        ways_per_index(ways_per_index != 0 ? ways_per_index : capacity / size_block),
+        capacity(capacity),
+        num_all_ways(capacity / size_block),
+        num_indices(num_all_ways / ways_per_index),
+        len_index(std::log2(num_indices)),
+        len_offset(std::log2(size_block)),
+        len_tag(len_addr - len_index - len_offset)
   {
     setup();
   }
