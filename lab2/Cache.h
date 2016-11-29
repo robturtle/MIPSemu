@@ -2,7 +2,7 @@
 #define CS6133_YANGLIU_CACHE_1127_2219
 
 #ifndef NDEBUG
-#include "cache_debug.h"
+#include <iostream>
 #endif
 
 #include <cmath>
@@ -28,14 +28,10 @@ class Cache
 {
 #ifndef NDEBUG
 public:
-  void inspect_tags()
-  {
-    inspect_way_tags(way_info, ways_per_index);
-  }
-
   void inspect_tags_of_index(size_t idx)
   {
     size_t way_base = linear_way_addr(idx, 0);
+    std::cout << "TAG[" << idx << "] ";
     std::cout << "EVICT: " << evict_way.at(idx) << '\n';
     for (size_t i = 0; i < ways_per_index; i++)
     {
