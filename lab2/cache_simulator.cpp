@@ -104,6 +104,7 @@ int main(int argc, char const *const argv[])
   check_fstream(traceout, outfname.c_str());
 
   TraceEntry entry;
+  size_t entry_number = 1;
   while (traces.good())
   {
     traces >> entry;
@@ -117,7 +118,39 @@ int main(int argc, char const *const argv[])
       result << (l1.hit(addr) ? ReadHit : ReadMiss) << ' ';
       if (l1.hit(addr)) result << NoAccess << '\n';
       else result << (l2.hit(addr) ? ReadHit : ReadMiss) << '\n';
+#ifndef NDEBUG
+      bool both_miss = !l1.hit(addr) && !l2.hit(addr);
+      bool l2_full = l2.ways_are_full(l2.index(addr));
+      if (both_miss && l2_full)
+      {
+        cout << "--------------------------------------------------\n";
+        cout << "(" << dec << entry_number << ") ";
+        cout << hex;
+        cout << "R " << addr << "\n";
+
+        cout << "\nL2: ";
+        cout << "TAG: " << setw(6) << l2.tag(addr)
+             << " INDEX: " << setw(4) << l2.index(addr)
+             << " OFFSET: " << setw(4) << l2.offset(addr)
+             << '\n';
+        cout << "Before read: TAGS[" << l2.index(addr) << "]: ";
+        l2.inspect_tags_of_index(l2.index(addr));
+      }
+#endif
       l1.read(addr);
+#ifndef NDEBUG
+      if (both_miss && l2_full)
+      {
+        cout << "\nAfter read: TAGS[" << l2.index(addr) << "]: ";
+        l2.inspect_tags_of_index(l2.index(addr));
+        cout << "\nRESULT: " << result.str() << '\n';
+        cout << "--------------------------------------------------\n";
+#ifdef STEP_OVER
+        cout << "\npress Enter to continue..." << endl;
+        cin.get();
+#endif
+      }
+#endif
     }
     else
     {
@@ -127,29 +160,6 @@ int main(int argc, char const *const argv[])
       l1.write(addr, 0xaa);
     }
     traceout << result.str();
-#ifndef NDEBUG
-    cout << hex;
-    cout << (entry.is_read ? "Read" : "Write") << " " << addr << '\n';
-    cout << "RESULT: " << result.str();
-
-    cout << "L1: ";
-    cout << "TAG: " << setw(6) << l1.tag(addr)
-         << " INDEX: " << setw(4) << l1.index(addr)
-         << " OFFSET: " << setw(4) << l1.offset(addr)
-         << '\n';
-    cout << "TAGS: \n";
-    l1.inspect_tags();
-
-    cout << "\nL2: ";
-    cout << "TAG: " << setw(6) << l2.tag(addr)
-         << " INDEX: " << setw(4) << l2.index(addr)
-         << " OFFSET: " << setw(4) << l2.offset(addr)
-         << '\n';
-    cout << "TAGS: \n";
-    l2.inspect_tags();
-
-    cout << "\npress Enter to continue..." << endl;
-    cin.get();
-#endif
+    ++entry_number;
   }
 }
