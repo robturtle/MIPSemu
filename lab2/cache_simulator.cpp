@@ -99,7 +99,9 @@ int main(int argc, char const *const argv[])
 
   ifstream traces{argv[2]};
   check_fstream(traces, argv[2]);
-  string outfname{(ostringstream() << argv[2] << ".out").str()};
+
+  ostringstream o; o << argv[2] << ".out";
+  string outfname = o.str();
   ofstream traceout{outfname};
   check_fstream(traceout, outfname.c_str());
 
