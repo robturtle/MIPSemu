@@ -26,32 +26,6 @@ struct WayInfo
 template <typename Lower>
 class Cache
 {
-#ifndef NDEBUG
-public:
-  void inspect_tags_of_index(size_t idx)
-  {
-    size_t way_base = linear_way_addr(idx, 0);
-    std::cout << "TAG[" << idx << "] ";
-    std::cout << "EVICT: " << evict_way.at(idx) << '\n';
-    for (size_t i = 0; i < ways_per_index; i++)
-    {
-      std::cout << std::hex << way_info.at(way_base + i).tag << " | ";
-    }
-    std::cout << '\n';
-  }
-
-  bool ways_are_full(size_t idx) const
-  {
-    size_t way_base = linear_way_addr(idx, 0);
-    for (size_t i = 0; i < ways_per_index; i++)
-    {
-      if (!way_info.at(way_base + i).valid)
-        return false;
-    }
-    return true;
-  }
-#endif
-
   Lower &lower;
   
   std::vector<char> caches;
