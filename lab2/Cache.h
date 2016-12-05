@@ -52,7 +52,7 @@ public:
         ways_per_index(ways_per_index != 0 ? ways_per_index : capacity / size_block),
         capacity(capacity),
         num_all_ways(capacity / size_block),
-        num_indices(num_all_ways / ways_per_index),
+        num_indices(num_all_ways / this->ways_per_index),
         len_index(std::log2(num_indices)),
         len_offset(std::log2(size_block)),
         len_tag(len_addr - len_index - len_offset)
