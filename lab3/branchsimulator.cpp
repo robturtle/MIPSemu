@@ -31,6 +31,8 @@ public:
         !(state == StrongNotTaken && !last_is_taken))
     {
       int change = last_is_taken ? 1 : -1;
+      if (state ^ (state + change))
+        change *= 2;
       state += change;
     }
   }
